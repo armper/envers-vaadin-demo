@@ -2,59 +2,59 @@ package gov.noaa.ims.common.views.enversdemo;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-
-import com.github.javafaker.Faker;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
-import gov.noaa.ims.common.views.Address;
-import gov.noaa.ims.common.views.Person;
+import gov.noaa.ims.common.service.Person;
+import gov.noaa.ims.common.service.PersonService;
+import gov.noaa.ims.common.service.TestDataGenerator;
 
 @PageTitle("Envers Demo")
 @Route(value = "envers")
 @RouteAlias(value = "")
 public class EnversDemoView extends VerticalLayout {
 
-    private final PersonRepository personRepository;
-    private final Faker faker = new Faker();
+    private final PersonService personService;
 
-    public EnversDemoView(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-        initializeDatabaseIfEmpty();
-        add(createTitle("Envers Demo"), createGridForPerson(), createGridForPersonRevision());
+    private final RevisionHistoryDialog revisionHistoryLayout;
+
+    public EnversDemoView(TestDataGenerator testDataGenerator,
+            PersonService personService, RevisionHistoryDialog revisionHistoryDialog) {
+        this.personService = personService;
+        this.revisionHistoryLayout = revisionHistoryDialog;
+
+        testDataGenerator.populateDatabaseIfEmpty();
+
+        GridPro<Person> personGrid = createGridProWithItems(personService.getAllPersons(), "Persons List");
+
+        Button viewRevisionHistoryButton = new Button("Revision History", event -> {
+            personGrid.getSelectionModel().getFirstSelectedItem().ifPresent(person -> {
+                showRevisionHistoryLayoutDialog(person);
+            });
+        });
+
+        add(new H1("Envers Demo"),
+                personGrid,
+                viewRevisionHistoryButton, revisionHistoryDialog);
+
     }
 
-    private Component createTitle(String titleText) {
-        return new H1(titleText);
+    private void showRevisionHistoryLayoutDialog(Person person) {
+
+        revisionHistoryLayout.setPerson(person);
+        revisionHistoryLayout.open();
     }
 
-    private Grid<Person> createGridForPersonRevision() {
-        AuditReader reader = createAuditReader();
-        Grid<Person> gridForPersonRevision = createGridWithItems(
-                reader.createQuery().forRevisionsOfEntity(Person.class, true, true).getResultList());
-        prependTitleToGrid(gridForPersonRevision, "Person Revision List");
-        return gridForPersonRevision;
-    }
-
-    private GridPro<Person> createGridForPerson() {
-        GridPro<Person> gridForPerson = createGridWithItems(personRepository.findAll());
-        prependTitleToGrid(gridForPerson, "Person List");
-        return gridForPerson;
-    }
-
-    private GridPro<Person> createGridWithItems(List<Person> items) {
+    public GridPro<Person> createGridProWithItems(List<Person> items, String title) {
         GridPro<Person> grid = new GridPro<>();
+
+        // add selection model
+        grid.setSelectionMode(GridPro.SelectionMode.MULTI);
 
         grid.setItems(items);
 
@@ -88,46 +88,6 @@ public class EnversDemoView extends VerticalLayout {
     }
 
     private void savePerson(Person person) {
-        this.personRepository.save(person);
+        this.personService.save(person);
     }
-
-    private void prependTitleToGrid(Grid<Person> grid, String titleText) {
-        Component title = new H2(titleText);
-        grid.prependHeaderRow().join(grid.getColumns().stream().toArray(Grid.Column[]::new)).setComponent(title);
-    }
-
-    private AuditReader createAuditReader() {
-        EntityManager entityManager = personRepository.getEntityManager();
-        return AuditReaderFactory.get(entityManager);
-    }
-
-    private void initializeDatabaseIfEmpty() {
-        if (personRepository.count() == 0) {
-            populateDatabaseWithRandomTestData();
-        }
-    }
-
-    private void populateDatabaseWithRandomTestData() {
-        for (int i = 0; i < 10; i++) {
-            Person person = createRandomPerson();
-            personRepository.save(person);
-        }
-    }
-
-    private Person createRandomPerson() {
-        Person person = new Person();
-        person.setName(faker.name().firstName());
-        person.setSurname(faker.name().lastName());
-        person.setAddress(createRandomAddress());
-        return person;
-    }
-
-    private Address createRandomAddress() {
-        Address address = new Address();
-        address.setCity(faker.address().city());
-        address.setStreet(faker.address().streetAddress());
-        address.setZipCode(faker.address().zipCode());
-        return address;
-    }
-
 }
