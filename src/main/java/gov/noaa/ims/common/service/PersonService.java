@@ -25,6 +25,11 @@ public class PersonService {
         return personRepository.findAllJoinAddress();
     }
 
+    /*
+     * This method returns a list of RevisionInfo objects for a given person.
+     * 
+     * @param person
+     */
     @Transactional(readOnly = true)
     public List<RevisionInfo> getRevisionInfosForPerson(Person person) {
         AuditReader auditReader = auditReaderProvider.createAuditReader();
@@ -41,6 +46,11 @@ public class PersonService {
         }).collect(Collectors.toList());
     }
 
+    /*
+     * This method returns a list of RevisionInfo objects for a given address.
+     * 
+     * @param address
+     */
     @Transactional
     public List<RevisionInfo> getRevisionInfosForAddress(Address address) {
         AuditReader auditReader = auditReaderProvider.createAuditReader();
@@ -71,7 +81,9 @@ public class PersonService {
 
     @Transactional(readOnly = true)
     public Person getPersonById(Integer personId) {
-        return personRepository.findById(personId).orElse(null);
+        Person orElse = personRepository.findById(personId).orElse(null);
+        var address = orElse.getAddress();
+        return orElse;
     }
 
 }

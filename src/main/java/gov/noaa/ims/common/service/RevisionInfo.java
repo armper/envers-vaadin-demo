@@ -2,6 +2,9 @@ package gov.noaa.ims.common.service;
 
 import java.util.Date;
 
+/*
+ * This class is used to store revision information for a given entity.
+ */
 public class RevisionInfo {
 
     private int revisionNumber;
@@ -36,6 +39,12 @@ public class RevisionInfo {
 
     public void setRevisionTimestamp(long revisionTimestamp) {
         this.revisionTimestamp = revisionTimestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "RevisionInfo [revisionNumber=" + revisionNumber + ", revisionDate=" + revisionDate
+                + ", revisionTimestamp=" + revisionTimestamp + "]";
     }
 
 }

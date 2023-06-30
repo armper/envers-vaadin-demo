@@ -26,6 +26,11 @@ public class RevisionHistoryDialog extends Dialog {
     public RevisionHistoryDialog(PersonService personService, RevisionChangesDialog revisionChangesDialog) {
         this.personService = personService;
         this.revisionChangesDialog = revisionChangesDialog;
+
+        //make this dialog resizable
+        setResizable(true);
+
+        setDraggable(true);
     }
 
     @Transactional(readOnly = true)
@@ -36,11 +41,6 @@ public class RevisionHistoryDialog extends Dialog {
 
         add(new Paragraph("Getting revision for person: " + person.getName() + " " + person.getSurname()));
 
-        /*
-         * Each entry in the list would represent a single revision and could display
-         * information like the revision number, revision timestamp, and the username of
-         * the person who made the change.
-         */
         List<RevisionInfo> personRevisions = personService.getRevisionInfosForPerson(person);
         List<RevisionInfo> addressRevisions = personService.getRevisionInfosForAddress(person.getAddress());
 
@@ -53,6 +53,7 @@ public class RevisionHistoryDialog extends Dialog {
         personRevisions.sort((revision1, revision2) -> revision1.getRevisionNumber() - revision2.getRevisionNumber());
 
         Grid<RevisionInfo> personRevisionGrid = new Grid<>();
+        personRevisionGrid.setWidth("100%");
         personRevisionGrid.setSelectionMode(GridPro.SelectionMode.SINGLE);
 
         personRevisionGrid.setItems(personRevisions);
@@ -71,6 +72,7 @@ public class RevisionHistoryDialog extends Dialog {
         });
 
         add(viewChangesButton, revisionChangesDialog);
+
     }
 
 }
