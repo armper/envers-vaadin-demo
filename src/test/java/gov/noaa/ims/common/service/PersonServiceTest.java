@@ -23,7 +23,7 @@ public class PersonServiceTest {
         Person initialPerson = createAndSaveTestPerson();
 
         Person updatedPerson = updatePersonAddress(initialPerson);
-        personService.save(updatedPerson);
+        personService.merge(updatedPerson);
 
         List<RevisionInfo> revisionInfos = personService.getRevisionInfosForPerson(updatedPerson);
         assertEquals(2, revisionInfos.size(), "Expected 2 revisions for the updated person");
@@ -46,7 +46,7 @@ public class PersonServiceTest {
 
         person.setAddress(address);
 
-        personService.save(person);
+        personService.merge(person);
 
         return person;
     }

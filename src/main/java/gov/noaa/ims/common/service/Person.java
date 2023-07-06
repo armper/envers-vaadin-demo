@@ -1,11 +1,14 @@
 package gov.noaa.ims.common.service;
 
+import java.util.UUID;
+
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -13,9 +16,16 @@ import org.hibernate.envers.Audited;
 
 @Entity
 public class Person {
+
+    /** The universally unique identifier for this profile. */
+    @Column(name = "id", columnDefinition = "UUID")
     @Id
-    @GeneratedValue
-    private Integer id;
+    private UUID id;
+
+    @PrePersist
+    public void ensureId() {
+        id = UUID.randomUUID();
+    }
 
     @Audited
     private String name;
@@ -24,16 +34,8 @@ public class Person {
     private String surname;
 
     @Audited
-    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     private Address address;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -93,6 +95,14 @@ public class Person {
         builder.append(address);
         builder.append("]");
         return builder.toString();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
 }

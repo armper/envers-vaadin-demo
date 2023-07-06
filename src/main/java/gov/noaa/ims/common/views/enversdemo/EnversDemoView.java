@@ -8,15 +8,13 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 
 import gov.noaa.ims.common.service.Person;
 import gov.noaa.ims.common.service.PersonService;
 import gov.noaa.ims.common.service.TestDataGenerator;
 
 @PageTitle("Envers Demo")
-@Route(value = "envers")
-@RouteAlias(value = "")
+@Route
 public class EnversDemoView extends VerticalLayout {
 
     private final PersonService personService;

@@ -1,6 +1,7 @@
 package gov.noaa.ims.common.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.envers.AuditReader;
@@ -68,14 +69,14 @@ public class PersonService {
     }
 
     @Transactional(readOnly = true)
-    public Person getPersonAtRevision(Integer personId, Integer revision) {
+    public Person getPersonAtRevision(UUID personId, Integer revision) {
         AuditReader auditReader = auditReaderProvider.createAuditReader();
         return auditReader.find(Person.class, personId, revision);
     }
 
     @Transactional
-    public void save(Person person) {
-        personRepository.save(person);
+    public void merge(Person person) {
+        personRepository.merge(person);
 
     }
 
@@ -84,6 +85,11 @@ public class PersonService {
         Person orElse = personRepository.findById(personId).orElse(null);
         var address = orElse.getAddress();
         return orElse;
+    }
+
+    @Transactional
+    public void save(Person person) {
+        personRepository.save(person);
     }
 
 }

@@ -39,8 +39,13 @@ public class CustomPersonRepositoryImpl implements CustomPersonRepository {
     }
 
     @Override
-    public void save(Person person) {
+    public void merge(Person person) {
         entityManager.merge(person);
+    }
+
+    @Override
+    public void save(Person person) {
+        entityManager.persist(person);
     }
 
     @Override

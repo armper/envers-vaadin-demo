@@ -11,6 +11,8 @@ public interface CustomPersonRepository {
 
     public int count();
 
+    public void merge(Person person);
+
     public void save(Person person);
 
     public List<Person> findAll();

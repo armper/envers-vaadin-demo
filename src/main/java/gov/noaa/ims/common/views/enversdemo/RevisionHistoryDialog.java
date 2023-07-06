@@ -11,12 +11,14 @@ import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 
 import gov.noaa.ims.common.service.Person;
 import gov.noaa.ims.common.service.PersonService;
 import gov.noaa.ims.common.service.RevisionInfo;
 
 @SpringComponent
+@UIScope
 public class RevisionHistoryDialog extends Dialog {
 
     private final PersonService personService;
