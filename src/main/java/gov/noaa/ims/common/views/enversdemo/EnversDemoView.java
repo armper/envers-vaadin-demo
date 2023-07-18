@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import gov.noaa.ims.common.service.Address;
 import gov.noaa.ims.common.service.Person;
 import gov.noaa.ims.common.service.PersonService;
 import gov.noaa.ims.common.service.TestDataGenerator;
@@ -21,6 +22,8 @@ public class EnversDemoView extends VerticalLayout {
 
     private final RevisionHistoryDialog revisionHistoryLayout;
 
+    private GridPro<Person> personGrid;
+
     public EnversDemoView(TestDataGenerator testDataGenerator,
             PersonService personService, RevisionHistoryDialog revisionHistoryDialog) {
         this.personService = personService;
@@ -28,7 +31,7 @@ public class EnversDemoView extends VerticalLayout {
 
         testDataGenerator.populateDatabaseIfEmpty();
 
-        GridPro<Person> personGrid = createGridProWithItems(personService.getAllPersons(), "Persons List");
+        personGrid = createGridProWithItems(personService.getAllPersons(), "Persons List");
 
         Button viewRevisionHistoryButton = new Button("Revision History", event -> {
             personGrid.getSelectionModel().getFirstSelectedItem().ifPresent(person -> {
@@ -38,8 +41,24 @@ public class EnversDemoView extends VerticalLayout {
 
         add(new H1("Envers Demo"),
                 personGrid,
-                viewRevisionHistoryButton, revisionHistoryDialog);
+                viewRevisionHistoryButton, revisionHistoryDialog, populateWithNewAddressObjectButton());
 
+    }
+
+    private Button populateWithNewAddressObjectButton() {
+        return new Button("Populate with new Address object", event -> {
+            personGrid.getSelectionModel().getFirstSelectedItem().ifPresent(person -> {
+                person.setAddress(newAddress());
+                savePerson(person);
+                personGrid.getDataProvider().refreshAll();
+            });
+        });
+    }
+
+    private Address newAddress() {
+        Address address = personService.getAddressByStreet("New Street Object");
+
+        return address;
     }
 
     private void showRevisionHistoryLayoutDialog(Person person) {

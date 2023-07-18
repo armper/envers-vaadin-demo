@@ -2,8 +2,6 @@ package gov.noaa.ims.common.views.enversdemo;
 
 import java.util.List;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
@@ -11,14 +9,12 @@ import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
 
 import gov.noaa.ims.common.service.Person;
 import gov.noaa.ims.common.service.PersonService;
 import gov.noaa.ims.common.service.RevisionInfo;
 
 @SpringComponent
-@UIScope
 public class RevisionHistoryDialog extends Dialog {
 
     private final PersonService personService;
@@ -29,13 +25,12 @@ public class RevisionHistoryDialog extends Dialog {
         this.personService = personService;
         this.revisionChangesDialog = revisionChangesDialog;
 
-        //make this dialog resizable
+        // make this dialog resizable
         setResizable(true);
 
         setDraggable(true);
     }
 
-    @Transactional(readOnly = true)
     public void setPerson(Person person) {
         removeAll();
 
@@ -43,8 +38,8 @@ public class RevisionHistoryDialog extends Dialog {
 
         add(new Paragraph("Getting revision for person: " + person.getName() + " " + person.getSurname()));
 
-        List<RevisionInfo> personRevisions = personService.getRevisionInfosForPerson(person);
-        List<RevisionInfo> addressRevisions = personService.getRevisionInfosForAddress(person.getAddress());
+        List<RevisionInfo> personRevisions = personService.getRevisionInfosForPerson(person.getId());
+        List<RevisionInfo> addressRevisions = personService.getRevisionInfosForAddress(person.getAddress().getId());
 
         addressRevisions.stream()
                 .filter(addressRevision -> personRevisions.stream().noneMatch(

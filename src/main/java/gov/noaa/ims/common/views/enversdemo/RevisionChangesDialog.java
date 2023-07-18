@@ -25,7 +25,7 @@ import gov.noaa.ims.common.service.RevisionInfo;
 public class RevisionChangesDialog extends Dialog {
 
     private final PersonService personService;
-    
+
     private Person currentPerson;
     private Person personAtRevision;
 
@@ -38,7 +38,7 @@ public class RevisionChangesDialog extends Dialog {
 
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void showChangesForRevision(Person currentPerson, RevisionInfo revisionInfo) {
         this.currentPerson = currentPerson;
 
@@ -77,6 +77,10 @@ public class RevisionChangesDialog extends Dialog {
     private List<String> highlightedFields() {
         List<String> highlightedFields = new ArrayList<>();
 
+        if (personAtRevision == null) {
+            return highlightedFields;
+        }
+
         if (!Objects.equals(currentPerson.getName(), personAtRevision.getName())) {
             highlightedFields.add("name");
         }
@@ -87,6 +91,10 @@ public class RevisionChangesDialog extends Dialog {
 
         Address currentAddress = currentPerson.getAddress();
         Address revisedAddress = personAtRevision.getAddress();
+
+        if (!Objects.equals(currentAddress.getId(), revisedAddress.getId())) {
+            highlightedFields.add("address.id");
+        }
 
         if (!Objects.equals(currentAddress.getStreet(), revisedAddress.getStreet())) {
             highlightedFields.add("address.street");

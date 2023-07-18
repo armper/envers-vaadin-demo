@@ -15,9 +15,14 @@ public class PersonDetails extends VerticalLayout {
     public PersonDetails(Person person, List<String> highlightFields) {
         this.highlightFields = highlightFields;
 
+        if (person == null) {
+            return;
+        }
+
         addDetails("id", "Id", String.valueOf(person.getId()));
         addDetails("name", "Name", person.getName());
         addDetails("surname", "Surname", person.getSurname());
+        addDetails("address.id", "Id", person.getAddress().getId() + "");
         addDetails("address.street", "Street", person.getAddress().getStreet());
         addDetails("address.city", "City", person.getAddress().getCity());
         addDetails("address.zip", "Zip", person.getAddress().getZipCode());

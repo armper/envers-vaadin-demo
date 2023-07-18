@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.DefaultRevisionEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +15,19 @@ public class PersonService {
 
     private final AuditReaderProvider auditReaderProvider;
 
-    private final CustomPersonRepository personRepository;
+    private final PersonRepository personRepository;
 
-    public PersonService(AuditReaderProvider auditReaderProvider, CustomPersonRepository personRepository) {
+    private final AddressRepository addressRepository;
+
+    public PersonService(AuditReaderProvider auditReaderProvider, PersonRepository personRepository,
+            AddressRepository addressRepository) {
         this.auditReaderProvider = auditReaderProvider;
         this.personRepository = personRepository;
+        this.addressRepository = addressRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<Person> getAllPersons() {
-        return personRepository.findAllJoinAddress();
+        return personRepository.findAllJoinFetchAddress();
     }
 
     /*
@@ -31,12 +35,12 @@ public class PersonService {
      * 
      * @param person
      */
-    @Transactional(readOnly = true)
-    public List<RevisionInfo> getRevisionInfosForPerson(Person person) {
-        AuditReader auditReader = auditReaderProvider.createAuditReader();
+    @Transactional
+    public List<RevisionInfo> getRevisionInfosForPerson(UUID personId) {
+        AuditReader auditReader = AuditReaderFactory.get(personRepository.getEntityManager());
 
         List<Number> revisionNumbers = auditReader.getRevisions(Person.class,
-                person.getId());
+                personId);
 
         return revisionNumbers.stream().map(revisionNumber -> {
             DefaultRevisionEntity revisionEntity = auditReader.findRevision(DefaultRevisionEntity.class,
@@ -53,11 +57,11 @@ public class PersonService {
      * @param address
      */
     @Transactional
-    public List<RevisionInfo> getRevisionInfosForAddress(Address address) {
+    public List<RevisionInfo> getRevisionInfosForAddress(Integer addressId) {
         AuditReader auditReader = auditReaderProvider.createAuditReader();
 
         List<Number> revisionNumbers = auditReader.getRevisions(Address.class,
-                address.getId());
+                addressId);
 
         return revisionNumbers.stream().map(revisionNumber -> {
             DefaultRevisionEntity revisionEntity = auditReader.findRevision(DefaultRevisionEntity.class,
@@ -68,28 +72,26 @@ public class PersonService {
         }).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Person getPersonAtRevision(UUID personId, Integer revision) {
         AuditReader auditReader = auditReaderProvider.createAuditReader();
         return auditReader.find(Person.class, personId, revision);
     }
 
-    @Transactional
-    public void merge(Person person) {
-        personRepository.merge(person);
-
+    public Person getPersonById(UUID personId) {
+        return personRepository.findById(personId).orElse(null);
     }
 
-    @Transactional(readOnly = true)
-    public Person getPersonById(Integer personId) {
-        Person orElse = personRepository.findById(personId).orElse(null);
-        var address = orElse.getAddress();
-        return orElse;
-    }
-
-    @Transactional
     public void save(Person person) {
         personRepository.save(person);
+    }
+
+    public Address getAddress(Integer addressId) {
+        return addressRepository.findById(addressId).orElse(null);
+    }
+
+    public Address getAddressByStreet(String street) {
+        return addressRepository.findByStreet(street);
     }
 
 }

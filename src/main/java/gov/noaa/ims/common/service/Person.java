@@ -15,6 +15,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.envers.Audited;
 
 @Entity
+@Audited
 public class Person {
 
     /** The universally unique identifier for this profile. */
@@ -27,14 +28,11 @@ public class Person {
         id = UUID.randomUUID();
     }
 
-    @Audited
     private String name;
 
-    @Audited
     private String surname;
 
-    @Audited
-    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private Address address;
 
     public String getName() {
@@ -70,7 +68,6 @@ public class Person {
         Person person = (Person) o;
         return new EqualsBuilder()
                 .append(id, person.id)
-
                 .isEquals();
     }
 
@@ -78,7 +75,6 @@ public class Person {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(id)
-
                 .toHashCode();
     }
 
